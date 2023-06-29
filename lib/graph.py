@@ -3,43 +3,59 @@ This module implements Classes and Methods for Graph creation and manipulation
 """
 
 class Node:
-    """ Node of a graph is where edges meet """
-    edges = []
-    def __init__(self, name: str):
-        self.name = name
+    """ node of a graph is where edges meet """
+    def __init__(self):
+        self.edges = set()
+    def remove(self):
+        """ remove itself and its connected edges """
+        for edge in self.edges:
+            edge.remove()
 
 class Edge:
-    """ Connection between two nodes """
-    def __init__(self, name: str, nodes: tuple):
-        self.name = name
-        self.nodes = nodes
+    """ connection between two nodes """
+    def __init__(self, nodes: list):
+        self.nodes = set()
+        for node in nodes:
+            self.nodes.add(node)
+            if not self in node.edges:
+                node.edges.add(self)
+    def remove(self):
+        """ remove itself """
+        for node in self.nodes:
+            if self in node.edges:
+                node.edges.remove(self)
+        self.nodes = set()
 
 class Graph:
-    """ A network of nodes and edges """
-    nodes = set() # Set of all nodes in the graph
-    edges = set() # Set of all edges in the graph
-    def __init__(self, name: str):
-        self.name = name
+    """ a network of nodes and edges """
+    def __init__(self):
+        self.nodes = set() # Set of all nodes in the graph
+        self.edges = set() # Set of all edges in the graph
     def add_node(self,node: Node):
-        """ Add a node to the graph """
+        """ add a node to the graph """
         self.nodes.add(node)
-        for edge in node.edges:
-            if not edge in self.edges:
-                self.add_edge(edge)
     def remove_node(self, node: Node):
-        """ Removing a node from the graph """
-        # Remove all the edges connected to that node
-        for edge in node.edges:
-            if edge in self.edges:
-                self.edges.remove(edge)
-        # Remove the node itself
+        """ removing a node from the graph """
+        node.remove()
         self.nodes.remove(node)
     def add_edge(self,edge: Node):
-        """ Add an edge to the graph """
+        """ add an edge to the graph """
         self.edges.add(edge)
-        for node in edge.nodes:
-            if not node in self.nodes:
-                self.add_node(node)
     def remove_edge(self, edge: Edge):
-        """ Removing an edge from the graph """
+        """ removing an edge from the graph """
+        edge.remove()
         self.edges.remove(edge)
+    def dump(self):
+        """ print graph as netlist using pseudonames """
+        edge_list = []
+        node_list = []
+        for edge in self.edges:
+            if not edge in edge_list:
+                edge_list.append(edge)
+            line = f"e{edge_list.index(edge)}"
+            for node in edge.nodes:
+                if not node in node_list:
+                    node_list.append(node)
+                line += f" n{node_list.index(node)}"
+            print(line)
+            
